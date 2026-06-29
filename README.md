@@ -1,60 +1,74 @@
-# Hệ thống Gợi ý Chuyên ngành CNTT (Hybrid Knowledge System)
+# Hệ thống Gợi ý Chuyên ngành CNTT
 
-Đồ án tốt nghiệp — Hệ thống lai **Expert System + Random Forest** gợi ý chuyên ngành dựa trên điểm số môn học.
+Dự án tốt nghiệp: hệ thống gợi ý chuyên ngành kết hợp **Expert System** và **Random Forest** để đề xuất chuyên ngành dựa trên điểm thi và luật chuyên gia.
 
-## Kiến trúc
+## Kiến trúc hiện tại
 
 | Thành phần | Công nghệ | Vai trò |
 |---|---|---|
-| AI Layer | Random Forest (scikit-learn) | Phân tích pattern điểm số, dự đoán xác suất |
-| Expert Layer | TinyDB + Rule Engine | Lưu trữ & suy diễn tập luật tri thức miền |
-| Hybrid Engine | Trọng số 60% AI + 40% Chuyên gia | Kết hợp & giải thích (XAI) |
-| Giao diện | Streamlit | Form nhập điểm, dashboard, quản trị luật |
+| AI Layer | Random Forest (scikit-learn) | Dự đoán chuyên ngành từ dữ liệu điểm số |
+| Expert Layer | SQLite + Rule Engine | Quản lý luật, suy diễn và giải thích gợi ý |
+| Hybrid Engine | Kết hợp Expert + ML | So sánh và trộn kết quả đề xuất |
+| Giao diện | Streamlit | Nhập điểm, dashboard, quản trị luật |
 
-## Cài đặt & chạy
+## Cài đặt và chạy
 
 ```bash
 pip install -r requirements.txt
-python scripts/train.py
+python scripts/train_v2.py
 streamlit run app/main.py
 ```
 
+> Chạy lệnh từ thư mục gốc của dự án để `Streamlit` và `src` được nhận đúng đường dẫn.
+
 ## Cấu trúc thư mục
 
-```
+```text
 ThucTapTotNghiep/
-├── app/                        # Giao diện Streamlit
-│   ├── main.py                 # Trang chủ
-│   ├── pages/                  # Các trang chức năng
+├── app/
+│   ├── main.py
+│   ├── pages/
+│   │   ├── 1_Goi_y_chuyen_nganh.py
+│   │   ├── 2_Dashboard.py
+│   │   └── 3_Quan_tri_luat.py
 │   └── utils/
-│       └── charts.py           # Biểu đồ Plotly
-├── src/                        # Logic nghiệp vụ
-│   ├── config.py               # Cấu hình, hằng số
-│   ├── data_loader.py          # Tiền xử lý CSV
-│   ├── db.py                   # TinyDB (UTF-8)
-│   ├── expert_system.py        # Hệ chuyên gia + luật
-│   ├── ml_model.py             # Random Forest
-│   └── hybrid_engine.py        # Bộ suy diễn lai
+│       └── charts.py
+├── src/
+│   ├── cache.py
+│   ├── config.py
+│   ├── database.py
+│   ├── data_loader.py
+│   ├── expert_system_v2.py
+│   ├── hybrid_engine_v2.py
+│   └── ml_model_v2.py
 ├── data/
-│   ├── raw/data.csv            # Dữ liệu gốc (895 SV)
-│   ├── rules/rules.json        # Tập luật TinyDB
-│   └── history/                # Lịch sử gợi ý
+│   ├── history/
+│   │   └── recommendations.db
+│   ├── processed/
+│   ├── raw/
+│   │   └── data.csv
+│   └── rules/
+│       └── rules.db
 ├── models/
-│   └── random_forest.joblib    # Mô hình đã huấn luyện
+│   └── random_forest.joblib
 ├── scripts/
-│   └── train.py                # Huấn luyện mô hình
+│   ├── migrate_to_sqlite.py
+│   ├── train_v2.py
+│   └── train.py
 ├── requirements.txt
-└── README.md
+├── README.md
+├── QUICKSTART.md
+└── IMPROVEMENTS.md
 ```
 
-## Chức năng
+## Chức năng chính
 
-| Trang | Mô tả |
-|---|---|
-| Gợi ý chuyên ngành | Nhập điểm, XAI, so sánh AI / chuyên gia / lai |
-| Dashboard | Thống kê dữ liệu, confusion matrix, feature importance |
-| Quản trị luật | CRUD tập luật TinyDB (mật khẩu: `admin123`) |
+- Gợi ý chuyên ngành dựa trên điểm môn học
+- So sánh kết quả AI / chuyên gia / hybrid
+- Quản trị luật theo SQLite
+- Dashboard đánh giá mô hình và thống kê dữ liệu
 
-## 7 chuyên ngành
+## Các chuyên ngành hỗ trợ
 
 Khoa học Dữ liệu · IoT · Công nghệ CSDL · Hệ thống Thông minh · Công nghệ Game · Công nghệ Mạng · Kỹ thuật Phần mềm
+

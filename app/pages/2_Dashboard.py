@@ -8,7 +8,7 @@ import utils  # noqa: F401
 
 import streamlit as st
 
-from src.config import COURSE_LABELS_VI, MAJOR_LABELS_VI
+from src.config import COURSE_LABELS_VI, MAJOR_LABELS_VI, MODELS_DIR
 from src.data_loader import get_dataset_summary, load_raw_data
 from src.ml_model_v2 import MajorClassifier
 from utils.charts import (
@@ -31,12 +31,14 @@ def load_data():
 
 
 @st.cache_resource
-def load_classifier():
+def load_classifier(model_mtime):
     return MajorClassifier.load()
 
 
 df = load_data()
-clf = load_classifier()
+model_path = MODELS_DIR / "random_forest.joblib"
+model_mtime = model_path.stat().st_mtime if model_path.exists() else None
+clf = load_classifier(model_mtime)
 summary = get_dataset_summary(df)
 
 st.subheader("Tổng quan dữ liệu")
@@ -74,7 +76,7 @@ with tab_data:
 with tab_model:
     metrics = clf.metrics
     if not metrics:
-        st.warning("Mô hình chưa có metrics. Chạy: `python scripts/train.py`")
+        st.warning("Mô hình chưa có metrics. Chạy: `python scripts/train_v2.py`")
     else:
         c1, c2, c3, c4 = st.columns(4)
         c1.metric("Accuracy", f"{metrics.get('accuracy', 0)*100:.1f}%")
@@ -85,8 +87,15 @@ with tab_model:
         st.markdown(
             f"- Tập huấn luyện: **{metrics.get('train_size', '—')}** mẫu\n"
             f"- Tập kiểm tra: **{metrics.get('test_size', '—')}** mẫu\n"
-            f"- Thuật toán: **Random Forest** (200 cây, max_depth=12, class_weight=balanced)"
+            f"- Thuật toán: **Random Forest** ({clf.best_params.get('n_estimators', 200)} cây, max_depth={clf.best_params.get('max_depth', 'auto')}, max_features={clf.best_params.get('max_features', 'auto')}, class_weight={clf.best_params.get('class_weight', 'balanced')})"
         )
+
+        st.subheader("Thông số mô hình tốt nhất")
+        best_params_table = [
+            {"Thuộc tính": k, "Giá trị": str(v)}
+            for k, v in clf.best_params.items()
+        ]
+        st.dataframe(best_params_table, use_container_width=True, hide_index=True)
 
         col_a, col_b = st.columns(2)
         with col_a:
@@ -105,6 +114,14 @@ with tab_model:
         if clf.classification_report_str:
             st.subheader("Báo cáo phân loại (Classification Report)")
             st.code(clf.classification_report_str, language="text")
+
+        st.subheader("Tổng quan đánh giá mô hình")
+        st.markdown(
+            f"- CV Accuracy trung bình: **{metrics.get('cv_mean', 0)*100:.1f}%**\n"
+            f"- Độ lệch CV: **±{metrics.get('cv_std', 0)*100:.2f}%**\n"
+            f"- Accuracy trên test set: **{metrics.get('accuracy', 0)*100:.1f}%**\n"
+            f"- F1-macro trên test set: **{metrics.get('f1_macro', 0)*100:.1f}%**"
+        )
 
     st.divider()
     if st.button("🔄 Huấn luyện lại mô hình", type="secondary"):

@@ -105,6 +105,22 @@ class MajorClassifier:
         accuracy = accuracy_score(y_test, y_pred)
         f1 = f1_score(y_test, y_pred, average="macro")
 
+        self.metrics = {
+            "accuracy": round(accuracy, 4),
+            "f1_macro": round(f1, 4),
+            "cv_mean": round(searcher.best_score_, 4),
+            "cv_std": 0.0,
+            "train_size": len(X_train),
+            "test_size": len(X_test),
+        }
+        self.confusion = confusion_matrix(y_test, y_pred, labels=MAJORS)
+        self.classification_report_str = classification_report(
+            y_test, y_pred, labels=MAJORS, zero_division=0
+        )
+        self.feature_importance = dict(
+            zip(COURSES, self.model.feature_importances_.round(4))
+        )
+
         return {
             "best_params": self.best_params,
             "best_cv_score": round(searcher.best_score_, 4),
