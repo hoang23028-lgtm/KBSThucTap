@@ -1,19 +1,25 @@
 ﻿# Quickstart
 
-Hướng dẫn nhanh để chạy ứng dụng với SQLite và mô hình đã tune.
+Hướng dẫn nhanh để chạy ứng dụng (migrate → train → run).
 
-## 1. Migrate dữ liệu từ TinyDB sang SQLite
+## Prerequisites
+
+- Python 3.9+
+- Cài đặt dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+## 1. Migrate dữ liệu (nếu cần)
 
 ```bash
 python scripts/migrate_to_sqlite.py
 ```
 
-Kết quả:
+Kết quả: tạo `data/rules/rules.db` và `data/history/recommendations.db`.
 
-- `data/rules/rules.db`
-- `data/history/recommendations.db`
-
-## 2. Huấn luyện mô hình với hyperparameter tuning
+## 2. Huấn luyện mô hình
 
 ```bash
 python scripts/train_v2.py
@@ -21,9 +27,8 @@ python scripts/train_v2.py
 
 Kết quả:
 
-- `models/random_forest.joblib` được cập nhật
-- Best hyperparameters được lưu
-- Metrics và classification report được ghi lại
+- Cập nhật `models/random_forest.joblib`
+- In ra best hyperparameters và metrics
 
 ## 3. Chạy ứng dụng Streamlit
 
@@ -31,30 +36,27 @@ Kết quả:
 streamlit run app/main.py
 ```
 
-> Chạy lệnh từ thư mục gốc của dự án để `src` được import đúng.
+> Luôn chạy từ thư mục gốc để `src` được import chính xác.
 
-## 4. Kiểm tra migration
+## 4. Kiểm tra database
 
 ```bash
 python -c "import sqlite3; conn = sqlite3.connect('data/rules/rules.db'); cur = conn.cursor(); cur.execute('SELECT COUNT(*) FROM rules'); print('rules', cur.fetchone()[0]); conn.close();"
-```
 
-```bash
 python -c "import sqlite3; conn = sqlite3.connect('data/history/recommendations.db'); cur = conn.cursor(); cur.execute('SELECT COUNT(*) FROM recommendations'); print('recommendations', cur.fetchone()[0]); conn.close();"
 ```
 
-## 5. Cấu hình nhanh
+## 5. Quick config tweaks
 
-- Thay đổi `max_size` trong `src/cache.py` nếu cần tối ưu bộ nhớ.
-- Tăng `n_iter` trong `scripts/train_v2.py` để kiểm tra thêm nhiều tham số.
+- Thay `max_size` trong `src/cache.py` để điều chỉnh bộ nhớ cache.
+- Tăng `n_iter` trong `scripts/train_v2.py` để thử thêm lựa chọn hyperparameters.
 
 ## 6. Troubleshooting
 
 - `Database is locked`: đóng các kết nối SQLite trước khi migrate.
-- `Module not found`: chạy từ root dự án hoặc xác nhận `PYTHONPATH`.
-- `Cache hit rate is low`: tăng `PredictionCache.max_size` hoặc xóa cache.
+- `ModuleNotFoundError`: chạy lệnh từ thư mục gốc hoặc kiểm tra `PYTHONPATH`.
 
-## 7. Lệnh tóm tắt
+## 7. Commands summary
 
 ```bash
 python scripts/migrate_to_sqlite.py
