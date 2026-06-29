@@ -1,0 +1,253 @@
+{
+  "_default": {
+    "1": {
+      "name": "DS - Thống kê cao",
+      "description": "Điểm Thống kê cơ bản >= 80 → tăng Khoa học Dữ liệu",
+      "conditions": [
+        {
+          "course": "Basic Statistics",
+          "operator": ">=",
+          "value": 80
+        }
+      ],
+      "logic": "AND",
+      "action_type": "boost",
+      "target_major": "DATA SCIENCE",
+      "weight": 0.15,
+      "active": true
+    },
+    "2": {
+      "name": "DS - Đại số tuyến tính cao",
+      "description": "Điểm Đại số tuyến tính >= 82 → tăng Khoa học Dữ liệu",
+      "conditions": [
+        {
+          "course": "Linear Algebra",
+          "operator": ">=",
+          "value": 82
+        }
+      ],
+      "logic": "AND",
+      "action_type": "boost",
+      "target_major": "DATA SCIENCE",
+      "weight": 0.12,
+      "active": true
+    },
+    "3": {
+      "name": "DS - Loại trừ toán yếu",
+      "description": "Điểm Giải tích < 60 → loại trừ Khoa học Dữ liệu",
+      "conditions": [
+        {
+          "course": "Calculus",
+          "operator": "<",
+          "value": 60
+        }
+      ],
+      "logic": "AND",
+      "action_type": "exclude",
+      "target_major": "DATA SCIENCE",
+      "weight": 0.0,
+      "active": true
+    },
+    "4": {
+      "name": "IS - AI cao",
+      "description": "Điểm AI >= 80 → tăng Hệ thống Thông minh",
+      "conditions": [
+        {
+          "course": "Artificial Intelligence",
+          "operator": ">=",
+          "value": 80
+        }
+      ],
+      "logic": "AND",
+      "action_type": "boost",
+      "target_major": "INTELLIGENT SYSTEM",
+      "weight": 0.18,
+      "active": true
+    },
+    "5": {
+      "name": "IS - Thuật toán cao",
+      "description": "AI >= 75 VÀ Thiết kế thuật toán >= 78 → tăng Hệ thống Thông minh",
+      "conditions": [
+        {
+          "course": "Artificial Intelligence",
+          "operator": ">=",
+          "value": 75
+        },
+        {
+          "course": "Algorithm Design and Analysis",
+          "operator": ">=",
+          "value": 78
+        }
+      ],
+      "logic": "AND",
+      "action_type": "boost",
+      "target_major": "INTELLIGENT SYSTEM",
+      "weight": 0.15,
+      "active": true
+    },
+    "6": {
+      "name": "NET - Mạng cao",
+      "description": "Điểm Mạng máy tính >= 82 → tăng Công nghệ Mạng",
+      "conditions": [
+        {
+          "course": "Computer Networks",
+          "operator": ">=",
+          "value": 82
+        }
+      ],
+      "logic": "AND",
+      "action_type": "boost",
+      "target_major": "NETWORK TECHNOLOGY",
+      "weight": 0.18,
+      "active": true
+    },
+    "7": {
+      "name": "NET - HĐH + Mạng",
+      "description": "Hệ điều hành >= 78 VÀ Mạng >= 80 → tăng Công nghệ Mạng",
+      "conditions": [
+        {
+          "course": "Operating System",
+          "operator": ">=",
+          "value": 78
+        },
+        {
+          "course": "Computer Networks",
+          "operator": ">=",
+          "value": 80
+        }
+      ],
+      "logic": "AND",
+      "action_type": "boost",
+      "target_major": "NETWORK TECHNOLOGY",
+      "weight": 0.12,
+      "active": true
+    },
+    "8": {
+      "name": "DB - CSDL cao",
+      "description": "Điểm Công nghệ CSDL >= 82 → tăng Công nghệ CSDL",
+      "conditions": [
+        {
+          "course": "Database Technology",
+          "operator": ">=",
+          "value": 82
+        }
+      ],
+      "logic": "AND",
+      "action_type": "boost",
+      "target_major": "DATABASE TECHNOLOGY",
+      "weight": 0.18,
+      "active": true
+    },
+    "9": {
+      "name": "DB - CTDL cao",
+      "description": "CSDL >= 78 VÀ Cấu trúc dữ liệu >= 78 → tăng Công nghệ CSDL",
+      "conditions": [
+        {
+          "course": "Database Technology",
+          "operator": ">=",
+          "value": 78
+        },
+        {
+          "course": "Data Structures",
+          "operator": ">=",
+          "value": 78
+        }
+      ],
+      "logic": "AND",
+      "action_type": "boost",
+      "target_major": "DATABASE TECHNOLOGY",
+      "weight": 0.12,
+      "active": true
+    },
+    "10": {
+      "name": "IoT - Mạng + CSDL",
+      "description": "Mạng >= 80 VÀ CSDL >= 80 → tăng IoT",
+      "conditions": [
+        {
+          "course": "Computer Networks",
+          "operator": ">=",
+          "value": 80
+        },
+        {
+          "course": "Database Technology",
+          "operator": ">=",
+          "value": 80
+        }
+      ],
+      "logic": "AND",
+      "action_type": "boost",
+      "target_major": "INTERNET OF THINGS",
+      "weight": 0.15,
+      "active": true
+    },
+    "11": {
+      "name": "GAME - Web + OOP",
+      "description": "Web >= 78 VÀ OOP >= 78 → tăng Công nghệ Game",
+      "conditions": [
+        {
+          "course": "Web Development",
+          "operator": ">=",
+          "value": 78
+        },
+        {
+          "course": "Object Oriented Programming",
+          "operator": ">=",
+          "value": 78
+        }
+      ],
+      "logic": "AND",
+      "action_type": "boost",
+      "target_major": "GAME TECHNOLOGY",
+      "weight": 0.15,
+      "active": true
+    },
+    "12": {
+      "name": "SE - Thiết kế chương trình",
+      "description": "Phương pháp thiết kế CT >= 78 → tăng Kỹ thuật Phần mềm",
+      "conditions": [
+        {
+          "course": "Program Design Methods",
+          "operator": ">=",
+          "value": 78
+        }
+      ],
+      "logic": "AND",
+      "action_type": "boost",
+      "target_major": "SOFTWARE ENGINEERING",
+      "weight": 0.12,
+      "active": true
+    },
+    "13": {
+      "name": "SE - OOP cao",
+      "description": "OOP >= 80 → tăng Kỹ thuật Phần mềm",
+      "conditions": [
+        {
+          "course": "Object Oriented Programming",
+          "operator": ">=",
+          "value": 80
+        }
+      ],
+      "logic": "AND",
+      "action_type": "boost",
+      "target_major": "SOFTWARE ENGINEERING",
+      "weight": 0.12,
+      "active": true
+    },
+    "14": {
+      "name": "Loại trừ AI yếu cho IS",
+      "description": "Điểm AI < 55 → loại trừ Hệ thống Thông minh",
+      "conditions": [
+        {
+          "course": "Artificial Intelligence",
+          "operator": "<",
+          "value": 55
+        }
+      ],
+      "logic": "AND",
+      "action_type": "exclude",
+      "target_major": "INTELLIGENT SYSTEM",
+      "weight": 0.0,
+      "active": true
+    }
+  }
+}

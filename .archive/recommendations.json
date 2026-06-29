@@ -1,0 +1,114 @@
+{
+  "_default": {
+    "1": {
+      "timestamp": "2026-06-29T14:05:18.668123",
+      "student_id": "TEST",
+      "scores": {
+        "Operating System": 85.0,
+        "Algorithm and Programming": 85.0,
+        "Program Design Methods": 85.0,
+        "Discrete Mathematics": 85.0,
+        "Linear Algebra": 85.0,
+        "Basic Statistics": 88,
+        "Data Structures": 85.0,
+        "Web Development": 85.0,
+        "Calculus": 85.0,
+        "Artificial Intelligence": 90,
+        "Algorithm Design and Analysis": 85.0,
+        "Database Technology": 85.0,
+        "Object Oriented Programming": 85.0,
+        "Computer Networks": 85.0
+      },
+      "recommended_major": "INTELLIGENT SYSTEM",
+      "confidence": 0.4712
+    },
+    "2": {
+      "timestamp": "2026-06-29T14:06:53.255996",
+      "student_id": "anonymous",
+      "scores": {
+        "Operating System": 80,
+        "Algorithm and Programming": 80,
+        "Program Design Methods": 80,
+        "Discrete Mathematics": 80,
+        "Linear Algebra": 80,
+        "Basic Statistics": 80,
+        "Data Structures": 80,
+        "Web Development": 80,
+        "Calculus": 80,
+        "Artificial Intelligence": 80,
+        "Algorithm Design and Analysis": 80,
+        "Database Technology": 80,
+        "Object Oriented Programming": 80,
+        "Computer Networks": 80
+      },
+      "recommended_major": "INTERNET OF THINGS",
+      "confidence": 0.2762
+    },
+    "3": {
+      "timestamp": "2026-06-29T14:09:25.731444",
+      "student_id": "anonymous",
+      "scores": {
+        "Operating System": 75.0,
+        "Algorithm and Programming": 75.0,
+        "Program Design Methods": 75.0,
+        "Discrete Mathematics": 75.0,
+        "Linear Algebra": 75.0,
+        "Basic Statistics": 75.0,
+        "Data Structures": 75.0,
+        "Web Development": 75.0,
+        "Calculus": 75.0,
+        "Artificial Intelligence": 75.0,
+        "Algorithm Design and Analysis": 75.0,
+        "Database Technology": 75.0,
+        "Object Oriented Programming": 75.0,
+        "Computer Networks": 75.0
+      },
+      "recommended_major": "DATABASE TECHNOLOGY",
+      "confidence": 0.2149
+    },
+    "4": {
+      "timestamp": "2026-06-29T14:09:39.840636",
+      "student_id": "anonymous",
+      "scores": {
+        "Operating System": 47.5,
+        "Algorithm and Programming": 75.0,
+        "Program Design Methods": 75.0,
+        "Discrete Mathematics": 75.0,
+        "Linear Algebra": 75.0,
+        "Basic Statistics": 75.0,
+        "Data Structures": 75.0,
+        "Web Development": 75.0,
+        "Calculus": 75.0,
+        "Artificial Intelligence": 75.0,
+        "Algorithm Design and Analysis": 75.0,
+        "Database Technology": 75.0,
+        "Object Oriented Programming": 75.0,
+        "Computer Networks": 75.0
+      },
+      "recommended_major": "DATABASE TECHNOLOGY",
+      "confidence": 0.2154
+    },
+    "5": {
+      "timestamp": "2026-06-29T14:11:31.760053",
+      "student_id": "anonymous",
+      "scores": {
+        "Operating System": 75.0,
+        "Algorithm and Programming": 75.0,
+        "Program Design Methods": 75.0,
+        "Discrete Mathematics": 75.0,
+        "Linear Algebra": 75.0,
+        "Basic Statistics": 75.0,
+        "Data Structures": 75.0,
+        "Web Development": 75.0,
+        "Calculus": 75.0,
+        "Artificial Intelligence": 75.0,
+        "Algorithm Design and Analysis": 75.0,
+        "Database Technology": 75.0,
+        "Object Oriented Programming": 75.0,
+        "Computer Networks": 75.0
+      },
+      "recommended_major": "DATABASE TECHNOLOGY",
+      "confidence": 0.2149
+    }
+  }
+}
