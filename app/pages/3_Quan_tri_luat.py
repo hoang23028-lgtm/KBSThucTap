@@ -48,10 +48,8 @@ st.sidebar.metric("Luật đang bật", active_count)
 tab_list, tab_add, tab_search = st.tabs(["📋 Danh sách luật", "➕ Thêm luật mới", "🔍 Tìm kiếm"])
 
 with tab_list:
-    if st.button("🔄 Khôi phục luật mặc định", type="secondary"):
-        n = expert.seed_default_rules()
-        st.success(f"Đã khôi phục {n} luật mặc định")
-        st.rerun()
+    # Note: restoring default rules has been disabled to prevent accidental overwrites.
+    # If you need to reseed rules, run `ExpertSystem().seed_default_rules()` manually in a controlled context.
 
     for rule in rules:
         rid = rule.get("doc_id") or rule.get("id")

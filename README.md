@@ -58,8 +58,8 @@ ThucTapTotNghiep/
 
 ## Development
 
-- Thực hiện thay đổi trong `src/`, chạy test nhỏ bằng script trong `scripts/`.
-- Khi cập nhật luật, gọi `ExpertSystem().seed_default_rules()` để ghi vào `data/rules/rules.db`.
+-- Thực hiện thay đổi trong `src/`, chạy test nhỏ bằng script trong `scripts/`.
+-- Lưu ý: chức năng tự động "khôi phục luật mặc định" đã bị vô hiệu hóa trong giao diện quản trị để tránh ghi đè vô tình lên tập luật đang sử dụng. Nếu thực sự cần ghi đè, gọi `ExpertSystem().seed_default_rules()` thủ công trong môi trường kiểm soát (ví dụ terminal), nhưng hãy sao lưu `data/rules/rules.db` trước.
 
 ## Verification
 
