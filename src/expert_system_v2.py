@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import ast
+import json
 from pathlib import Path
 from typing import Any, Optional
 
@@ -20,16 +22,19 @@ OPERATORS = {
 
 
 def _default_rules() -> list[dict]:
-    """Luật chuyên gia khởi tạo theo tri thức miền CNTT."""
+    """Luật chuyên gia khởi tạo theo tri thức miền CNTT và dữ liệu thực tế."""
     return [
         {
             "name": "DS - Thống kê cao",
             "description": "Điểm Thống kê cơ bản >= 80 → tăng Khoa học Dữ liệu",
-            "conditions": [{"course": "Basic Statistics", "operator": ">=", "value": 80}],
+            "conditions": [
+                {"course": "Basic Statistics", "operator": ">=", "value": 90},
+                {"course": "Linear Algebra", "operator": ">=", "value": 82},
+            ],
             "logic": "AND",
             "action_type": "boost",
             "target_major": "DATA SCIENCE",
-            "weight": 0.15,
+            "weight": 0.14,
             "active": True,
         },
         {
@@ -43,42 +48,58 @@ def _default_rules() -> list[dict]:
             "active": True,
         },
         {
-            "name": "DS - Loại trừ toán yếu",
-            "description": "Điểm Giải tích < 60 → loại trừ Khoa học Dữ liệu",
-            "conditions": [{"course": "Calculus", "operator": "<", "value": 60}],
-            "logic": "AND",
-            "action_type": "exclude",
-            "target_major": "DATA SCIENCE",
-            "weight": 0.0,
-            "active": True,
-        },
-        {
-            "name": "IS - AI cao",
-            "description": "Điểm AI >= 80 → tăng Hệ thống Thông minh",
-            "conditions": [{"course": "Artificial Intelligence", "operator": ">=", "value": 80}],
+            "name": "DS - Toán cao",
+            "description": "Đại số tuyến tính >= 82 VÀ Giải tích >= 90 → tăng Khoa học Dữ liệu",
+            "conditions": [
+                {"course": "Linear Algebra", "operator": ">=", "value": 82},
+                {"course": "Calculus", "operator": ">=", "value": 90},
+            ],
             "logic": "AND",
             "action_type": "boost",
-            "target_major": "INTELLIGENT SYSTEM",
+            "target_major": "DATA SCIENCE",
             "weight": 0.18,
             "active": True,
         },
         {
-            "name": "IS - Thuật toán cao",
-            "description": "AI >= 75 VÀ Thiết kế thuật toán >= 78 → tăng Hệ thống Thông minh",
+            "name": "IS - AI cao",
+            "description": "Điểm AI >= 88 → tăng Hệ thống Thông minh",
+            "conditions": [{"course": "Artificial Intelligence", "operator": ">=", "value": 88}],
+            "logic": "AND",
+            "action_type": "boost",
+            "target_major": "INTELLIGENT SYSTEM",
+            "weight": 0.14,
+            "active": True,
+        },
+        {
+            "name": "IS - AI + Thuật toán",
+            "description": "AI >= 88 VÀ Thiết kế thuật toán >= 78 → tăng Hệ thống Thông minh",
             "conditions": [
-                {"course": "Artificial Intelligence", "operator": ">=", "value": 75},
+                {"course": "Artificial Intelligence", "operator": ">=", "value": 88},
                 {"course": "Algorithm Design and Analysis", "operator": ">=", "value": 78},
             ],
             "logic": "AND",
             "action_type": "boost",
             "target_major": "INTELLIGENT SYSTEM",
-            "weight": 0.15,
+            "weight": 0.14,
             "active": True,
         },
         {
-            "name": "NET - Mạng cao",
-            "description": "Điểm Mạng máy tính >= 82 → tăng Công nghệ Mạng",
-            "conditions": [{"course": "Computer Networks", "operator": ">=", "value": 82}],
+            "name": "IS - AI + Mạng",
+            "description": "AI >= 90 VÀ Mạng máy tính >= 78 → tăng Hệ thống Thông minh",
+            "conditions": [
+                {"course": "Artificial Intelligence", "operator": ">=", "value": 90},
+                {"course": "Computer Networks", "operator": ">=", "value": 78},
+            ],
+            "logic": "AND",
+            "action_type": "boost",
+            "target_major": "INTELLIGENT SYSTEM",
+            "weight": 0.18,
+            "active": True,
+        },
+        {
+            "name": "NET - Mạng rất cao",
+            "description": "Điểm Mạng máy tính >= 90 → tăng Công nghệ Mạng",
+            "conditions": [{"course": "Computer Networks", "operator": ">=", "value": 90}],
             "logic": "AND",
             "action_type": "boost",
             "target_major": "NETWORK TECHNOLOGY",
@@ -86,11 +107,11 @@ def _default_rules() -> list[dict]:
             "active": True,
         },
         {
-            "name": "NET - HĐH + Mạng",
-            "description": "Hệ điều hành >= 78 VÀ Mạng >= 80 → tăng Công nghệ Mạng",
+            "name": "NET - HĐH + Mạng rất cao",
+            "description": "Hệ điều hành >= 70 VÀ Mạng >= 90 → tăng Công nghệ Mạng",
             "conditions": [
-                {"course": "Operating System", "operator": ">=", "value": 78},
-                {"course": "Computer Networks", "operator": ">=", "value": 80},
+                {"course": "Operating System", "operator": ">=", "value": 70},
+                {"course": "Computer Networks", "operator": ">=", "value": 90},
             ],
             "logic": "AND",
             "action_type": "boost",
@@ -99,9 +120,9 @@ def _default_rules() -> list[dict]:
             "active": True,
         },
         {
-            "name": "DB - CSDL cao",
-            "description": "Điểm Công nghệ CSDL >= 82 → tăng Công nghệ CSDL",
-            "conditions": [{"course": "Database Technology", "operator": ">=", "value": 82}],
+            "name": "DB - CSDL rất cao",
+            "description": "Điểm Công nghệ CSDL >= 90 → tăng Công nghệ CSDL",
+            "conditions": [{"course": "Database Technology", "operator": ">=", "value": 90}],
             "logic": "AND",
             "action_type": "boost",
             "target_major": "DATABASE TECHNOLOGY",
@@ -109,11 +130,24 @@ def _default_rules() -> list[dict]:
             "active": True,
         },
         {
-            "name": "DB - CTDL cao",
-            "description": "CSDL >= 78 VÀ Cấu trúc dữ liệu >= 78 → tăng Công nghệ CSDL",
+            "name": "DB - CSDL + OOP",
+            "description": "CSDL >= 90 VÀ OOP >= 85 → tăng Công nghệ CSDL",
             "conditions": [
-                {"course": "Database Technology", "operator": ">=", "value": 78},
-                {"course": "Data Structures", "operator": ">=", "value": 78},
+                {"course": "Database Technology", "operator": ">=", "value": 90},
+                {"course": "Object Oriented Programming", "operator": ">=", "value": 85},
+            ],
+            "logic": "AND",
+            "action_type": "boost",
+            "target_major": "DATABASE TECHNOLOGY",
+            "weight": 0.18,
+            "active": True,
+        },
+        {
+            "name": "DB - CSDL + CTDL",
+            "description": "CSDL >= 90 VÀ Cấu trúc dữ liệu >= 75 → tăng Công nghệ CSDL",
+            "conditions": [
+                {"course": "Database Technology", "operator": ">=", "value": 90},
+                {"course": "Data Structures", "operator": ">=", "value": 75},
             ],
             "logic": "AND",
             "action_type": "boost",
@@ -122,35 +156,79 @@ def _default_rules() -> list[dict]:
             "active": True,
         },
         {
-            "name": "IoT - Mạng + CSDL",
-            "description": "Mạng >= 80 VÀ CSDL >= 80 → tăng IoT",
+            "name": "IoT - Mạng + CSDL chuẩn",
+            "description": "Mạng máy tính >= 82 VÀ CSDL >= 88 → tăng IoT",
             "conditions": [
-                {"course": "Computer Networks", "operator": ">=", "value": 80},
-                {"course": "Database Technology", "operator": ">=", "value": 80},
+                {"course": "Computer Networks", "operator": ">=", "value": 82},
+                {"course": "Database Technology", "operator": ">=", "value": 88},
             ],
             "logic": "AND",
             "action_type": "boost",
             "target_major": "INTERNET OF THINGS",
-            "weight": 0.15,
+            "weight": 0.18,
+            "active": True,
+        },
+        {
+            "name": "IoT - Mạng + CSDL mở rộng",
+            "description": "Mạng máy tính >= 85 VÀ CSDL >= 85 → tăng IoT",
+            "conditions": [
+                {"course": "Computer Networks", "operator": ">=", "value": 85},
+                {"course": "Database Technology", "operator": ">=", "value": 85},
+            ],
+            "logic": "AND",
+            "action_type": "boost",
+            "target_major": "INTERNET OF THINGS",
+            "weight": 0.12,
             "active": True,
         },
         {
             "name": "GAME - Web + OOP",
             "description": "Web >= 78 VÀ OOP >= 78 → tăng Công nghệ Game",
             "conditions": [
-                {"course": "Web Development", "operator": ">=", "value": 78},
-                {"course": "Object Oriented Programming", "operator": ">=", "value": 78},
+                {"course": "Web Development", "operator": ">=", "value": 85},
+                {"course": "Object Oriented Programming", "operator": ">=", "value": 85},
             ],
             "logic": "AND",
             "action_type": "boost",
             "target_major": "GAME TECHNOLOGY",
-            "weight": 0.15,
+            "weight": 0.06,
+            "active": False,
+        },
+        {
+            "name": "GAME - ATP + CTDL + Mạng",
+            "description": "Thuật toán và Lập trình >= 80 VÀ Cấu trúc dữ liệu >= 82 VÀ Mạng máy tính >= 80 → tăng Công nghệ Game",
+            "conditions": [
+                {"course": "Algorithm and Programming", "operator": ">=", "value": 82},
+                {"course": "Data Structures", "operator": ">=", "value": 82},
+                {"course": "Computer Networks", "operator": ">=", "value": 80},
+            ],
+            "logic": "AND",
+            "action_type": "boost",
+            "target_major": "GAME TECHNOLOGY",
+            "weight": 0.22,
             "active": True,
         },
         {
+            "name": "GAME - Web + OOP + ATP",
+            "description": "Web >= 80 VÀ OOP >= 90 VÀ Thuật toán và Lập trình >= 85 → tăng Công nghệ Game",
+            "conditions": [
+                {"course": "Web Development", "operator": ">=", "value": 82},
+                {"course": "Object Oriented Programming", "operator": ">=", "value": 90},
+                {"course": "Algorithm and Programming", "operator": ">=", "value": 86},
+            ],
+            "logic": "AND",
+            "action_type": "boost",
+            "target_major": "GAME TECHNOLOGY",
+            "weight": 0.18,
+            "active": False,
+        },
+        {
             "name": "SE - Thiết kế chương trình",
-            "description": "Phương pháp thiết kế CT >= 78 → tăng Kỹ thuật Phần mềm",
-            "conditions": [{"course": "Program Design Methods", "operator": ">=", "value": 78}],
+            "description": "Program Design Methods >= 88 VÀ OOP >= 85 → tăng Kỹ thuật Phần mềm",
+            "conditions": [
+                {"course": "Program Design Methods", "operator": ">=", "value": 88},
+                {"course": "Object Oriented Programming", "operator": ">=", "value": 85},
+            ],
             "logic": "AND",
             "action_type": "boost",
             "target_major": "SOFTWARE ENGINEERING",
@@ -159,12 +237,39 @@ def _default_rules() -> list[dict]:
         },
         {
             "name": "SE - OOP cao",
-            "description": "OOP >= 80 → tăng Kỹ thuật Phần mềm",
-            "conditions": [{"course": "Object Oriented Programming", "operator": ">=", "value": 80}],
+            "description": "OOP >= 90 → tăng Kỹ thuật Phần mềm",
+            "conditions": [{"course": "Object Oriented Programming", "operator": ">=", "value": 90}],
             "logic": "AND",
             "action_type": "boost",
             "target_major": "SOFTWARE ENGINEERING",
             "weight": 0.12,
+            "active": True,
+        },
+        {
+            "name": "SE - Thuật toán + CTDL + OOP",
+            "description": "Thuật toán và Lập trình >= 88 VÀ Cấu trúc dữ liệu >= 80 VÀ OOP >= 85 → tăng Kỹ thuật Phần mềm",
+            "conditions": [
+                {"course": "Algorithm and Programming", "operator": ">=", "value": 88},
+                {"course": "Data Structures", "operator": ">=", "value": 80},
+                {"course": "Object Oriented Programming", "operator": ">=", "value": 85},
+            ],
+            "logic": "AND",
+            "action_type": "boost",
+            "target_major": "SOFTWARE ENGINEERING",
+            "weight": 0.18,
+            "active": True,
+        },
+        {
+            "name": "SE - Thuật toán cao",
+            "description": "Thuật toán và Lập trình >= 90 VÀ Phương pháp thiết kế CT >= 80 → tăng Kỹ thuật Phần mềm",
+            "conditions": [
+                {"course": "Algorithm and Programming", "operator": ">=", "value": 90},
+                {"course": "Program Design Methods", "operator": ">=", "value": 80},
+            ],
+            "logic": "AND",
+            "action_type": "boost",
+            "target_major": "SOFTWARE ENGINEERING",
+            "weight": 0.18,
             "active": True,
         },
         {
@@ -175,7 +280,7 @@ def _default_rules() -> list[dict]:
             "action_type": "exclude",
             "target_major": "INTELLIGENT SYSTEM",
             "weight": 0.0,
-            "active": True,
+            "active": False,
         },
     ]
 
@@ -195,16 +300,19 @@ class ExpertSystem:
 
     def _load_rules_to_cache(self) -> None:
         """Load tất cả rules vào in-memory cache (tối ưu truy vấn)."""
-        import json
         all_rules = self.db.all()
         
         # Parse conditions từ string (nếu từ SQLite)
         for rule in all_rules:
-            if isinstance(rule.get("conditions"), str):
+            conds = rule.get("conditions")
+            if isinstance(conds, str):
                 try:
-                    rule["conditions"] = json.loads(rule["conditions"])
-                except:
-                    pass
+                    rule["conditions"] = json.loads(conds)
+                except json.JSONDecodeError:
+                    try:
+                        rule["conditions"] = ast.literal_eval(conds)
+                    except Exception:
+                        rule["conditions"] = []
         
         rules_cache.load(all_rules)
 
@@ -231,8 +339,11 @@ class ExpertSystem:
             if isinstance(rule_copy.get("conditions"), str):
                 try:
                     rule_copy["conditions"] = json.loads(rule_copy["conditions"])
-                except:
-                    pass
+                except json.JSONDecodeError:
+                    try:
+                        rule_copy["conditions"] = ast.literal_eval(rule_copy["conditions"])
+                    except Exception:
+                        rule_copy["conditions"] = []
             # Add doc_id for compatibility with admin UI (TinyDB-style)
             rule_copy["doc_id"] = rule_copy.get("id", rule_copy.get("doc_id"))
             result.append(rule_copy)
@@ -315,7 +426,7 @@ class ExpertSystem:
         """
         Suy diễn từ tập luật.
         
-        Returns:
+            "conditions": [{"course": "Object Oriented Programming", "operator": ">=", "value": 90}],
             (probability dict per major, list of fired rules with details)
         """
         import json
@@ -336,8 +447,14 @@ class ExpertSystem:
             if isinstance(conditions, str):
                 try:
                     conditions = json.loads(conditions)
-                except:
-                    conditions = []
+                except json.JSONDecodeError:
+                    try:
+                        conditions = ast.literal_eval(conditions)
+                    except Exception:
+                        conditions = []
+
+            if not isinstance(conditions, list):
+                conditions = []
 
             # Kiểm tra điều kiện
             if self._check_conditions(rule, scores, conditions):
@@ -377,6 +494,9 @@ class ExpertSystem:
             conditions = rule.get("conditions", [])
         
         logic = rule.get("logic", "AND")
+
+        if not conditions:
+            return False
 
         if logic == "AND":
             return all(self._eval_condition(cond, scores) for cond in conditions)

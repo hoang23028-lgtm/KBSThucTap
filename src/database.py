@@ -1,5 +1,6 @@
 """SQLite database layer với support cho rules và history."""
 
+import json
 import sqlite3
 from datetime import datetime
 from pathlib import Path
@@ -89,7 +90,7 @@ class SQLiteDB:
                     (
                         doc.get("name"),
                         doc.get("description"),
-                        str(doc.get("conditions")),
+                        json.dumps(doc.get("conditions")),
                         doc.get("logic", "AND"),
                         doc.get("action_type"),
                         doc.get("target_major"),
@@ -134,6 +135,8 @@ class SQLiteDB:
         """Cập nhật document theo ID."""
         with sqlite3.connect(self.db_path) as conn:
             if self.db_path.name == "rules.db":
+                if "conditions" in updates and isinstance(updates["conditions"], (list, dict)):
+                    updates["conditions"] = json.dumps(updates["conditions"])
                 set_clause = ", ".join([f"{k} = ?" for k in updates.keys()])
                 values = list(updates.values()) + [doc_id]
                 conn.execute(

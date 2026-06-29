@@ -66,11 +66,15 @@ with tab_list:
             # Parse conditions if it's a string (from SQLite)
             conditions = rule.get("conditions", [])
             if isinstance(conditions, str):
+                import ast
                 import json
                 try:
                     conditions = json.loads(conditions)
-                except:
-                    conditions = []
+                except json.JSONDecodeError:
+                    try:
+                        conditions = ast.literal_eval(conditions)
+                    except Exception:
+                        conditions = []
             
             cond_text = []
             for c in conditions:
