@@ -15,8 +15,8 @@ from src.config import (
 )
 from src.cache import prediction_cache
 from src.database import open_db
-from src.expert_system_v2 import ExpertSystem
-from src.ml_model_v2 import MajorClassifier
+from src.expert_system import ExpertSystem
+from src.ml_model import MajorClassifier
 
 
 class HybridRecommendationEngine:
@@ -28,10 +28,7 @@ class HybridRecommendationEngine:
         self.classifier = classifier or MajorClassifier.load()
         self.expert = expert or ExpertSystem()
         
-        # SQLite database cho history
-        history_db_path = HISTORY_DB.with_suffix(".db")
-        history_db_path.parent.mkdir(parents=True, exist_ok=True)
-        self.history_db = open_db(history_db_path)
+        self.history_db = open_db(HISTORY_DB)
 
     def _combine(
         self, ai_proba: dict[str, float], expert_proba: dict[str, float]
@@ -200,9 +197,7 @@ class HybridRecommendationEngine:
 
     def get_history(self, limit: int = 50) -> list[dict]:
         """Lấy lịch sử gợi ý (mới nhất trước)."""
-        records = self.history_db.all()
-        # SQLite returns in order, so reverse to get newest first
-        return list(reversed(records[-limit:]))
+        return self.history_db.all(limit=limit)
 
     def compare_methods(self, scores: dict) -> dict:
         """So sánh 3 phương pháp: chỉ AI, chỉ chuyên gia, lai."""

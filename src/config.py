@@ -1,10 +1,11 @@
+import os
 from pathlib import Path
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 DATA_RAW = ROOT_DIR / "data" / "raw" / "data.csv"
 MODELS_DIR = ROOT_DIR / "models"
-RULES_DB = ROOT_DIR / "data" / "rules" / "rules.json"
-HISTORY_DB = ROOT_DIR / "data" / "history" / "recommendations.json"
+RULES_DB = ROOT_DIR / "data" / "rules" / "rules.db"
+HISTORY_DB = ROOT_DIR / "data" / "history" / "recommendations.db"
 
 COURSES = [
     "Operating System",
@@ -64,4 +65,4 @@ COURSE_LABELS_VI = {
 HYBRID_AI_WEIGHT = 0.6
 HYBRID_EXPERT_WEIGHT = 0.4
 
-ADMIN_PASSWORD = "admin123"
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")

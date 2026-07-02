@@ -1,6 +1,6 @@
 ﻿# Quickstart
 
-Hướng dẫn nhanh để chạy ứng dụng (migrate → train → run).
+Hướng dẫn nhanh để chạy ứng dụng (train → run).
 
 ## Prerequisites
 
@@ -11,24 +11,30 @@ Hướng dẫn nhanh để chạy ứng dụng (migrate → train → run).
 pip install -r requirements.txt
 ```
 
-## 1. Migrate dữ liệu (nếu cần)
+## 1. Huấn luyện mô hình (nếu chưa có)
 
 ```bash
-python scripts/migrate_to_sqlite.py
-```
-
-Kết quả: tạo `data/rules/rules.db` và `data/history/recommendations.db`.
-
-## 2. Huấn luyện mô hình
-
-```bash
-python scripts/train_v2.py
+python scripts/train.py
 ```
 
 Kết quả:
 
 - Cập nhật `models/random_forest.joblib`
 - In ra best hyperparameters và metrics
+- Khởi tạo `data/rules/rules.db` nếu chưa tồn tại
+
+## 2. Cấu hình mật khẩu quản trị
+
+```powershell
+# Windows PowerShell
+$env:ADMIN_PASSWORD = "your-password"
+```
+
+Hoặc tạo `.streamlit/secrets.toml`:
+
+```toml
+ADMIN_PASSWORD = "your-password"
+```
 
 ## 3. Chạy ứng dụng Streamlit
 
@@ -49,17 +55,18 @@ python -c "import sqlite3; conn = sqlite3.connect('data/history/recommendations.
 ## 5. Quick config tweaks
 
 - Thay `max_size` trong `src/cache.py` để điều chỉnh bộ nhớ cache.
-- Tăng `n_iter` trong `scripts/train_v2.py` để thử thêm lựa chọn hyperparameters.
+- Tăng `n_iter` trong `scripts/train.py` để thử thêm lựa chọn hyperparameters.
 
 ## 6. Troubleshooting
 
-- `Database is locked`: đóng các kết nối SQLite trước khi migrate.
+- `Database is locked`: đóng các kết nối SQLite trước khi chạy script khác.
 - `ModuleNotFoundError`: chạy lệnh từ thư mục gốc hoặc kiểm tra `PYTHONPATH`.
+- Trang Quản trị không đăng nhập được: kiểm tra `ADMIN_PASSWORD` đã được set.
 
 ## 7. Commands summary
 
 ```bash
-python scripts/migrate_to_sqlite.py
-python scripts/train_v2.py
+python scripts/train.py
+$env:ADMIN_PASSWORD = "your-password"
 streamlit run app/main.py
 ```

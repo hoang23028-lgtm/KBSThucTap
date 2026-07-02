@@ -21,9 +21,19 @@ Chạy các lệnh sau từ thư mục gốc của dự án:
 
 ```bash
 pip install -r requirements.txt
-python scripts/migrate_to_sqlite.py   # (nếu cần migrate)
-python scripts/train_v2.py            # huấn luyện và lưu model
+python scripts/train.py               # huấn luyện và lưu model (nếu chưa có)
+$env:ADMIN_PASSWORD = "your-password" # Windows — bắt buộc cho trang Quản trị
 streamlit run app/main.py             # khởi động web UI
+```
+
+> Database SQLite (`data/rules/rules.db`, `data/history/recommendations.db`) được tạo tự động khi chạy lần đầu. Nếu `rules.db` trống, hệ thống sẽ seed luật mặc định.
+
+### Mật khẩu quản trị
+
+Trang **Quản trị luật** yêu cầu `ADMIN_PASSWORD` qua biến môi trường (xem `.env.example`) hoặc `.streamlit/secrets.toml`:
+
+```toml
+ADMIN_PASSWORD = "your-password"
 ```
 
 ## Architecture
@@ -39,32 +49,37 @@ streamlit run app/main.py             # khởi động web UI
 
 ```text
 ThucTapTotNghiep/
-├── app/ (Streamlit app + pages)
-├── src/ (core modules: cache, database, expert system, hybrid engine, ml)
-├── data/ (raw, processed, rules, history)
-├── models/ (trained model artifacts)
-├── scripts/ (migration, training, analysis)
+├── app/                    # Streamlit app + pages + utils/charts
+├── src/                    # Core: config, database, expert, hybrid, ml, cache
+│   ├── default_rules.py    # Luật mặc định (tách riêng)
+│   └── rule_utils.py       # Parse/chuẩn hóa luật
+├── data/
+│   ├── raw/data.csv
+│   ├── rules/rules.db
+│   └── history/recommendations.db
+├── models/random_forest.joblib
+├── scripts/                # train, analyze_rules_quality, ...
 ├── requirements.txt
-├── README.md
-├── QUICKSTART.md
-└── IMPROVEMENTS.md
+└── README.md
 ```
 
 ## Usage
 
-- Migrate dữ liệu: `python scripts/migrate_to_sqlite.py`
-- Huấn luyện: `python scripts/train_v2.py`
+- Huấn luyện: `python scripts/train.py`
 - Chạy app: `streamlit run app/main.py`
+- Phân tích luật: `python scripts/analyze_rules_quality.py`
 
 ## Development
 
--- Thực hiện thay đổi trong `src/`, chạy test nhỏ bằng script trong `scripts/`.
--- Lưu ý: chức năng tự động "khôi phục luật mặc định" đã bị vô hiệu hóa trong giao diện quản trị để tránh ghi đè vô tình lên tập luật đang sử dụng. Nếu thực sự cần ghi đè, gọi `ExpertSystem().seed_default_rules()` thủ công trong môi trường kiểm soát (ví dụ terminal), nhưng hãy sao lưu `data/rules/rules.db` trước.
+- Thực hiện thay đổi trong `src/`, chạy test nhỏ bằng script trong `scripts/`.
+- Chức năng tự động "khôi phục luật mặc định" đã bị vô hiệu hóa trong giao diện quản trị. Nếu cần ghi đè, gọi `ExpertSystem().seed_default_rules()` thủ công (sao lưu `data/rules/rules.db` trước).
 
 ## Verification
 
-- Kiểm tra model tồn tại: `ls models/random_forest.joblib`
-- Kiểm tra rules: `python -c "from src.expert_system_v2 import ExpertSystem; print(len(ExpertSystem().get_all_rules()))"`
+```bash
+python -c "from src.expert_system import ExpertSystem; print(len(ExpertSystem().get_all_rules()), 'rules')"
+python -c "from src.ml_model import MajorClassifier; print(MajorClassifier.load().metrics)"
+```
 
 ## Contributing
 
@@ -77,5 +92,4 @@ ThucTapTotNghiep/
 - Liên hệ: chủ dự án trên GitHub: `https://github.com/hoang23028-lgtm/KBSThucTap`
 
 ---
-Last updated: 2026-06-29
-
+Last updated: 2026-07-02

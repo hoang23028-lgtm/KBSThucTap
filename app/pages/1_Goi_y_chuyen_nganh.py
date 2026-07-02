@@ -1,9 +1,5 @@
 """Trang gợi ý chuyên ngành cho sinh viên."""
 
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import utils  # noqa: F401
 
 import pandas as pd
@@ -11,7 +7,7 @@ import streamlit as st
 
 from src.config import COURSE_LABELS_VI, COURSES, MAJOR_LABELS_VI
 from src.data_loader import load_raw_data
-from src.hybrid_engine_v2 import HybridRecommendationEngine
+from src.hybrid_engine import HybridRecommendationEngine
 from utils.charts import method_comparison_chart, recommendation_bar_chart
 
 st.set_page_config(page_title="Gợi ý chuyên ngành", page_icon="🎯", layout="wide")

@@ -1,12 +1,9 @@
 """Huấn luyện Random Forest với hyperparameter tuning tối ưu."""
 
-import sys
-from pathlib import Path
+import _bootstrap  # noqa: F401
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-
-from src.expert_system_v2 import ExpertSystem
-from src.ml_model_v2 import MajorClassifier
+from src.expert_system import ExpertSystem
+from src.ml_model import MajorClassifier
 
 
 def main():

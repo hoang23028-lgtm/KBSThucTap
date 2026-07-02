@@ -1,12 +1,11 @@
 """Grid search for GAME rule thresholds and report best candidates."""
-import json
-from pathlib import Path
-from collections import Counter
-import itertools
-import sys
 
-ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT))
+import _bootstrap  # noqa: F401
+
+import itertools
+import json
+from collections import Counter
+from pathlib import Path
 
 from src.data_loader import load_raw_data, pivot_student_scores
 

@@ -1,12 +1,10 @@
-"""SQLite database layer với support cho rules và history."""
+"""SQLite database layer cho rules và history."""
 
 import json
 import sqlite3
-from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional
 
-from src.config import RULES_DB, HISTORY_DB
+from src.config import HISTORY_DB, RULES_DB
 
 
 class SQLiteDB:
@@ -17,13 +15,15 @@ class SQLiteDB:
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self._init_schema()
 
+    @property
+    def _is_rules_db(self) -> bool:
+        return self.db_path.name == "rules.db"
+
     def _init_schema(self) -> None:
-        """Khởi tạo schema database nếu chưa tồn tại."""
         with sqlite3.connect(self.db_path) as conn:
             conn.execute("PRAGMA encoding = 'UTF-8'")
-            
-            if self.db_path.name == "rules.db":
-                # Schema cho rules
+
+            if self._is_rules_db:
                 conn.execute(
                     """
                     CREATE TABLE IF NOT EXISTS rules (
@@ -41,7 +41,6 @@ class SQLiteDB:
                     )
                     """
                 )
-                # Index cho tối ưu truy vấn
                 conn.execute(
                     "CREATE INDEX IF NOT EXISTS idx_rules_target_major ON rules(target_major)"
                 )
@@ -49,7 +48,6 @@ class SQLiteDB:
                     "CREATE INDEX IF NOT EXISTS idx_rules_active ON rules(active)"
                 )
             else:
-                # Schema cho history recommendations
                 conn.execute(
                     """
                     CREATE TABLE IF NOT EXISTS recommendations (
@@ -65,25 +63,21 @@ class SQLiteDB:
                     )
                     """
                 )
-                # Index để tìm kiếm nhanh theo student_id
                 conn.execute(
                     "CREATE INDEX IF NOT EXISTS idx_recommendations_student ON recommendations(student_id)"
                 )
                 conn.execute(
                     "CREATE INDEX IF NOT EXISTS idx_recommendations_major ON recommendations(recommended_major)"
                 )
-            
+
             conn.commit()
 
     def insert(self, doc: dict) -> int:
-        """Thêm document vào database (simulate TinyDB insert)."""
         with sqlite3.connect(self.db_path) as conn:
-            conn.row_factory = sqlite3.Row
-            
-            if self.db_path.name == "rules.db":
+            if self._is_rules_db:
                 cursor = conn.execute(
                     """
-                    INSERT INTO rules 
+                    INSERT INTO rules
                     (name, description, conditions, logic, action_type, target_major, weight, active)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                     """,
@@ -115,29 +109,40 @@ class SQLiteDB:
                         str(doc.get("explanations")),
                     ),
                 )
-            
+
             conn.commit()
             return cursor.lastrowid
 
-    def all(self) -> list[dict]:
-        """Lấy tất cả documents (simulate TinyDB all)."""
+    def all(self, limit: int | None = None) -> list[dict]:
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
-            
-            if self.db_path.name == "rules.db":
-                cursor = conn.execute("SELECT * FROM rules WHERE active = 1")
+
+            if self._is_rules_db:
+                query = "SELECT * FROM rules ORDER BY id"
             else:
-                cursor = conn.execute("SELECT * FROM recommendations ORDER BY timestamp DESC")
-            
+                query = "SELECT * FROM recommendations ORDER BY timestamp DESC"
+                if limit is not None:
+                    query += f" LIMIT {int(limit)}"
+
+            cursor = conn.execute(query)
             return [dict(row) for row in cursor.fetchall()]
 
-    def update(self, doc_id: int, updates: dict) -> None:
-        """Cập nhật document theo ID."""
+    def get_by_id(self, doc_id: int) -> dict | None:
+        table = self._table_name()
         with sqlite3.connect(self.db_path) as conn:
-            if self.db_path.name == "rules.db":
+            conn.row_factory = sqlite3.Row
+            cursor = conn.execute(f"SELECT * FROM {table} WHERE id = ?", (doc_id,))
+            row = cursor.fetchone()
+            return dict(row) if row else None
+
+    def update(self, doc_id: int, updates: dict) -> None:
+        with sqlite3.connect(self.db_path) as conn:
+            if self._is_rules_db:
                 if "conditions" in updates and isinstance(updates["conditions"], (list, dict)):
                     updates["conditions"] = json.dumps(updates["conditions"])
-                set_clause = ", ".join([f"{k} = ?" for k in updates.keys()])
+                if "active" in updates and isinstance(updates["active"], bool):
+                    updates["active"] = 1 if updates["active"] else 0
+                set_clause = ", ".join(f"{k} = ?" for k in updates)
                 values = list(updates.values()) + [doc_id]
                 conn.execute(
                     f"UPDATE rules SET {set_clause}, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
@@ -146,47 +151,40 @@ class SQLiteDB:
             conn.commit()
 
     def remove(self, doc_id: int) -> None:
-        """Xóa document theo ID."""
         with sqlite3.connect(self.db_path) as conn:
             conn.execute(f"DELETE FROM {self._table_name()} WHERE id = ?", (doc_id,))
             conn.commit()
 
     def truncate(self) -> None:
-        """Xóa tất cả dữ liệu."""
         with sqlite3.connect(self.db_path) as conn:
             conn.execute(f"DELETE FROM {self._table_name()}")
             conn.commit()
 
     def search(self, **kwargs) -> list[dict]:
-        """Tìm kiếm theo điều kiện (optimize queries)."""
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
-            
-            if self.db_path.name == "rules.db" and "target_major" in kwargs:
+
+            if self._is_rules_db and "target_major" in kwargs:
                 cursor = conn.execute(
                     "SELECT * FROM rules WHERE target_major = ? AND active = 1",
                     (kwargs["target_major"],),
                 )
             else:
                 cursor = conn.execute(f"SELECT * FROM {self._table_name()}")
-            
+
             return [dict(row) for row in cursor.fetchall()]
 
     def count(self) -> int:
-        """Đếm số records."""
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.execute(f"SELECT COUNT(*) FROM {self._table_name()}")
             return cursor.fetchone()[0]
 
     def _table_name(self) -> str:
-        """Lấy tên bảng từ tên file."""
-        return "rules" if self.db_path.name == "rules.db" else "recommendations"
-
-    def close(self) -> None:
-        """Đóng kết nối (nếu cần)."""
-        pass
+        return "rules" if self._is_rules_db else "recommendations"
 
 
-def open_db(path: Path, **kwargs) -> SQLiteDB:
-    """Hàm wrapper tương tự TinyDB (compatibility)."""
+def open_db(path: Path | None = None, *, rules: bool = True) -> SQLiteDB:
+    """Mở database rules hoặc history."""
+    if path is None:
+        path = RULES_DB if rules else HISTORY_DB
     return SQLiteDB(path)

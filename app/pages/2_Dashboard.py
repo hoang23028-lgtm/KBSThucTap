@@ -1,16 +1,12 @@
 """Dashboard thống kê dữ liệu và đánh giá mô hình ML."""
 
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import utils  # noqa: F401
 
 import streamlit as st
 
 from src.config import COURSE_LABELS_VI, MAJOR_LABELS_VI, MODELS_DIR
 from src.data_loader import get_dataset_summary, load_raw_data
-from src.ml_model_v2 import MajorClassifier
+from src.ml_model import MajorClassifier
 from utils.charts import (
     confusion_matrix_chart,
     feature_importance_chart,
@@ -76,7 +72,7 @@ with tab_data:
 with tab_model:
     metrics = clf.metrics
     if not metrics:
-        st.warning("Mô hình chưa có metrics. Chạy: `python scripts/train_v2.py`")
+        st.warning("Mô hình chưa có metrics. Chạy: `python scripts/train.py`")
     else:
         c1, c2, c3, c4 = st.columns(4)
         c1.metric("Accuracy", f"{metrics.get('accuracy', 0)*100:.1f}%")

@@ -197,7 +197,7 @@ class MajorClassifier:
 
     def predict_proba(self, scores: dict | pd.Series) -> dict[str, float]:
         if self.model is None:
-            raise RuntimeError("Mô hình chưa được huấn luyện. Chạy train_model.py trước.")
+            raise RuntimeError("Mô hình chưa được huấn luyện. Chạy scripts/train.py trước.")
 
         if isinstance(scores, dict):
             row = pd.DataFrame([[scores.get(c, 0.0) for c in COURSES]], columns=COURSES)

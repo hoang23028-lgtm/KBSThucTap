@@ -16,7 +16,7 @@ st.markdown(
     """
     **Hệ thống tri thức lai (Hybrid Knowledge System)** kết hợp:
     - 🤖 **Trí tuệ nhân tạo** — Random Forest phân tích pattern điểm số
-    - 📋 **Hệ chuyên gia** — Tập luật tri thức miền (TinyDB)
+    - 📋 **Hệ chuyên gia** — Tập luật tri thức miền (SQLite)
     - ⚖️ **Bộ suy diễn lai** — Kết hợp có trọng số, giải thích minh bạch (XAI)
     """
 )
@@ -38,7 +38,7 @@ st.markdown(
 ```mermaid
 flowchart LR
     A[Nhập điểm môn học] --> B[Random Forest]
-    A --> C[Hệ chuyên gia TinyDB]
+    A --> C[Hệ chuyên gia SQLite]
     B --> D[Bộ suy diễn lai]
     C --> D
     D --> E[Gợi ý + Giải thích XAI]

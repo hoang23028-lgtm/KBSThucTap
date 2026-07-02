@@ -1,29 +1,42 @@
-"""Quản trị tập luật hệ chuyên gia (TinyDB CRUD)."""
+"""Quản trị tập luật hệ chuyên gia (SQLite CRUD)."""
 
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import utils  # noqa: F401
 
 import streamlit as st
 
-from src.config import ADMIN_PASSWORD, COURSE_LABELS_VI, COURSES, MAJOR_LABELS_VI, MAJORS
-from src.expert_system_v2 import ExpertSystem, OPERATORS
+from src.config import ADMIN_PASSWORD, COURSE_LABELS_VI, COURSES, MAJOR_LABELS_VI, MAJORS, ROOT_DIR, RULES_DB
+from src.expert_system import ExpertSystem, OPERATORS
+from src.rule_utils import parse_conditions
 
 st.set_page_config(page_title="Quản trị luật", page_icon="⚙️", layout="wide")
 
 st.title("⚙️ Quản trị Tập luật Chuyên gia")
-st.caption("CRUD luật suy diễn lưu trên TinyDB — không cần sửa code")
+st.caption("CRUD luật suy diễn lưu trên SQLite — không cần sửa code")
+
+
+def _admin_password() -> str:
+    if ADMIN_PASSWORD:
+        return ADMIN_PASSWORD
+    return st.secrets.get("ADMIN_PASSWORD", "")
 
 
 def check_admin() -> bool:
+    password = _admin_password()
+    if not password:
+        st.error("Chưa cấu hình mật khẩu quản trị.")
+        st.markdown(
+            "Đặt biến môi trường `ADMIN_PASSWORD` trước khi chạy:\n\n"
+            "```powershell\n$env:ADMIN_PASSWORD = \"your-password\"\nstreamlit run app/main.py\n```\n\n"
+            "Hoặc thêm `ADMIN_PASSWORD` vào `.streamlit/secrets.toml`."
+        )
+        return False
+
     if st.session_state.get("admin_authenticated"):
         return True
     st.warning("🔒 Khu vực quản trị — yêu cầu xác thực")
     pwd = st.text_input("Mật khẩu quản trị", type="password")
     if st.button("Đăng nhập"):
-        if pwd == ADMIN_PASSWORD:
+        if pwd == password:
             st.session_state["admin_authenticated"] = True
             st.rerun()
         else:
@@ -48,9 +61,6 @@ st.sidebar.metric("Luật đang bật", active_count)
 tab_list, tab_add, tab_search = st.tabs(["📋 Danh sách luật", "➕ Thêm luật mới", "🔍 Tìm kiếm"])
 
 with tab_list:
-    # Note: restoring default rules has been disabled to prevent accidental overwrites.
-    # If you need to reseed rules, run `ExpertSystem().seed_default_rules()` manually in a controlled context.
-
     for rule in rules:
         rid = rule.get("doc_id") or rule.get("id")
         status = "🟢" if rule.get("active", True) else "🔴"
@@ -61,25 +71,14 @@ with tab_list:
             st.markdown(f"**Mô tả:** {rule.get('description', '—')}")
             st.markdown(f"**Logic:** {rule.get('logic', 'AND')} | **Trọng số:** {rule.get('weight', 0)}")
 
-            # Parse conditions if it's a string (from SQLite)
-            conditions = rule.get("conditions", [])
-            if isinstance(conditions, str):
-                import ast
-                import json
-                try:
-                    conditions = json.loads(conditions)
-                except json.JSONDecodeError:
-                    try:
-                        conditions = ast.literal_eval(conditions)
-                    except Exception:
-                        conditions = []
-            
+            conditions = parse_conditions(rule.get("conditions"))
             cond_text = []
             for c in conditions:
                 if isinstance(c, dict):
                     course_vi = COURSE_LABELS_VI.get(c.get("course", ""), c.get("course", ""))
                     cond_text.append(f"{course_vi} {c.get('operator', '')} {c.get('value', '')}")
-            st.markdown("**Điều kiện:** " + (" AND ".join(cond_text) if rule.get("logic", "AND") == "AND" else " OR ".join(cond_text)))
+            joiner = " AND " if rule.get("logic", "AND") == "AND" else " OR "
+            st.markdown("**Điều kiện:** " + joiner.join(cond_text))
 
             c1, c2, c3 = st.columns(3)
             with c1:
@@ -229,8 +228,9 @@ with tab_search:
         found = expert.search_rules(keyword)
         if found:
             for r in found:
+                rid = r.get("doc_id") or r.get("id")
                 st.markdown(
-                    f"**#{r.doc_id} — {r['name']}** → "
+                    f"**#{rid} — {r['name']}** → "
                     f"{MAJOR_LABELS_VI.get(r['target_major'], r['target_major'])} | "
                     f"{r.get('description', '')}"
                 )
@@ -238,4 +238,4 @@ with tab_search:
             st.info("Không tìm thấy luật phù hợp.")
 
 st.divider()
-st.caption(f"📁 Tập luật lưu tại: `data/rules/rules.json` (TinyDB)")
+st.caption(f"📁 Tập luật lưu tại: `{RULES_DB.relative_to(ROOT_DIR)}`")
